@@ -39,4 +39,8 @@ class Order extends Model
     {
         return $this->belongsTo(Reservation::class);
     }
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }

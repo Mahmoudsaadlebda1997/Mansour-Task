@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\MealsApiController;
+use App\Http\Controllers\Api\OrderApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ReservationApiController;
@@ -18,11 +20,16 @@ use App\Http\Controllers\Api\ReservationApiController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-//Route::group(['prefix' => '','namespace' => 'Api'],function (){
-//    Route::group(['prefix' => 'reservations'],function (){
-//        Route::post('/check','ReservationApiController@checkDate');
-//    });
-//});
-//Route::post('/reservations/check', 'Api\ReservationApiController@checkDate');
-Route::post('/reservations/check' , [ReservationApiController::class,'checkDate']);
+Route::group(['prefix' => '','namespace' => 'Api'],function (){
+    Route::group(['prefix' => 'reservations'],function (){
+        Route::post('/check' , [ReservationApiController::class,'checkDate']);
+        Route::post('/reserve' , [ReservationApiController::class,'reserveTable']);
+    });
+    Route::group(['prefix' => 'meals'],function (){
+        Route::get('/allMeals' , [MealsApiController::class,'allMeals']);
+    });
+    Route::group(['prefix' => 'orders'],function (){
+        Route::post('/createOrder' , [OrderApiController::class,'createOrder']);
+    });
+});
 
