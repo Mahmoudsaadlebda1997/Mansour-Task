@@ -19,7 +19,7 @@ use App\Http\Controllers\Api\ReservationApiController;
 Route::group(['prefix' => '','namespace' => 'Api'],function (){
     Route::group(['prefix' => 'reservations'],function (){
         Route::post('/check' , [ReservationApiController::class,'checkDate']);
-        Route::post('/reserve' , [ReservationApiController::class,'reserveTable'])->middleware('check.reservation');
+        Route::post('/reserve' , [ReservationApiController::class,'reserveTable'])->middleware(['check.availability','check.reservation']);
     });
     Route::group(['prefix' => 'meals'],function (){
         Route::get('/allMeals' , [MealsApiController::class,'allMeals']);

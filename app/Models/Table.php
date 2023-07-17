@@ -13,8 +13,11 @@ class Table extends Model
      *
      * @var array<int, string>
      */
+//    Table Status
+//    1 = Avaliable
+//    0 = Not Avaliable
     protected $fillable = [
-        'capacity'
+        'capacity','status'
     ];
     protected $table = 'tables';
     // one to many relationship
@@ -25,5 +28,23 @@ class Table extends Model
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
+    }
+    public function reserve($customer, $fromTime, $toTime)
+    {
+        if ($this->status !== 'available') {
+            // Table is not available, so create a reservation
+            $reservation = Reservation::create([
+                'customer_id' => $customer,
+                'from_time' => $fromTime,
+                'table_id' => $this->id,
+                'to_time' => $toTime
+            ]);
+            return $reservation;
+        } else {
+            // Table is available, so set the status to 'reserved'
+            $this->status = 'reserved';
+            $this->save();
+            return $this;
+        }
     }
 }

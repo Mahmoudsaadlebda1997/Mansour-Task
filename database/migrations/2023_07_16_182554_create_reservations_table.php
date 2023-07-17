@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->datetime('from_time')->nullable();
             $table->datetime('to_time')->nullable();
+            $table->string('status')->nullable();
             $table->unsignedBigInteger('table_id')->nullable();
             $table->foreign('table_id')->references('id')->on('tables');
             $table->unsignedBigInteger('customer_id')->nullable();

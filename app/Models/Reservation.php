@@ -17,11 +17,17 @@ class Reservation extends Model
         'table_id',
         'from_time',
         'to_time',
+        'customer_id',
+        'status'
     ];
     protected $table = 'reservations';
     // one to many relationship
     public function table()
     {
         return $this->belongsTo(Table::class);
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 }
