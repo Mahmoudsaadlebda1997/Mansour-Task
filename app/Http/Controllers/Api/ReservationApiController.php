@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Table;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -15,9 +16,24 @@ class ReservationApiController extends Controller
 //        dd($request->all());
         $table = Table::findOrFail($request->table_id);
         if ($table->capacity >= $request->capacity){
+            $fromTime = Carbon::parse($request->from_time);
+            $toTime = Carbon::parse($request->to_time);
+
             $reservations = Reservation::where('table_id', $table->id)
-                ->where('from_time', '<=', $request->dateAndTime)
-                ->where('to_time', '>=', $request->dateAndTime)
+                ->where(function ($query) use ($fromTime, $toTime) {
+                    $query->where(function ($query) use ($fromTime,$toTime) {
+                        $query->where('from_time', '>=', $fromTime)
+                            ->where('from_time', '<=', $toTime);
+                    })
+                        ->orWhere(function ($query) use ($toTime,$fromTime) {
+                            $query->where('to_time', '>=', $fromTime)
+                                ->where('to_time', '<=', $toTime);
+                        })
+                        ->orWhere(function ($query) use ($fromTime, $toTime) {
+                            $query->where('from_time', '<=', $fromTime)
+                                ->where('to_time', '>=', $toTime);
+                        });
+                })
                 ->get();
             if($reservations->count() > 0){
                 return response()->json([

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\MealsApiController;
 use App\Http\Controllers\Api\OrderApiController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ReservationApiController;
 
@@ -17,9 +16,6 @@ use App\Http\Controllers\Api\ReservationApiController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 Route::group(['prefix' => '','namespace' => 'Api'],function (){
     Route::group(['prefix' => 'reservations'],function (){
         Route::post('/check' , [ReservationApiController::class,'checkDate']);

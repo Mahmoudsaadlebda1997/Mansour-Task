@@ -7,6 +7,7 @@ use App\Models\Meal;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -56,10 +57,49 @@ class OrderApiController extends Controller
         }
         $order->save();
         $data = Order::with('orderDetails')->find($order->id);
-        return response()->json([
-            'success' => true,
-            'message' => 'Order is Made Succesfully',
-            'data' => $data
-        ], 201);
+//        return response()->json([
+//            'success' => true,
+//            'message' => 'Order is Made Succesfully',
+//            'data' => $data
+//        ], 201);
+        // Generate HTML invoice
+        $html = "<h1>Invoice for Table " . $request->table_id . "</h1>";
+        $html .= "<table>";
+        $html .= "<tr><th>Item</th><th>Price</th></tr>";
+        foreach ($data->orderDetails as $detail) {
+            $html .= "<tr><td>" . $detail->meal->name . "</td><td>" . $detail->amount_to_pay . "</td></tr>";
+        }
+        $html .= "<tr><td>Total:</td><td>" . $data->total_paid . "</td></tr>";
+        $html .= "</table>";
+
+        // Send invoice to printer
+        $client = new Client();
+        $response = $client->request('POST', 'https://www.google.com/cloudprint/submit', [
+            'headers' => [
+//                Here My Access Token From Login User
+                'Authorization' => 'Bearer YOUR_ACCESS_TOKEN',
+                'Content-Type' => 'application/json'
+            ],
+            'json' => [
+//                    Here i  Enter Printer ID
+                'printerid' => 'YOUR_PRINTER_ID',
+                'content' => base64_encode($html),
+                'contentType' => 'text/html',
+                'title' => 'Invoice for Table ' . $request->table_id
+            ]
+        ]);
+        if ($response->getStatusCode() == 200) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order is Made Succesfully and Invoice has been sent to the printer',
+                'data' => $data
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending print job: ' . $response->getBody(),
+                'data' => $data
+            ], 500);
+        }
     }
 }
